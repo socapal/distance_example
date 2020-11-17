@@ -40,82 +40,12 @@ PA$N_NEAR_ANP=S_NEAR_ANP$NOMBRE
 
 #Distance to closest polygon
 min_dist=st_distance(DCdmx_84, S_NEAR_ANP, by_element=TRUE)
-PB$min_dist=min_dist
+PA$min_dist=min_dist
 min_dist
 
 end = Sys.time()
 end - start    #19.554 mins (24x182 for CLOSEST features)
-
-#But Houston, there's a problem!
-#The nearest feature command returns us with features that are not the closest 
-## to Ciudad de México. Let's check that out.
-
-# 2.1.2 Visualization and Error in st_nearest_feature() --------------------------------
-
-  ##Visualization
-  ###Original crs.
-  Vis_3.1=ggplot()+geom_sf(data=DCdmx, fill="white")+
-    geom_sf(data=ANPs%>%slice(Near_ANP), fill="green")+
-    coord_sf()
-  ###Modified crs - WGS_84.
-  Vis_3.1_84=ggplot()+geom_sf(data=DCdmx_84, fill="white")+
-    geom_sf(data=ANPs_84%>%slice(Near_ANP), fill="green")+
-    coord_sf()
   
-  ##Comparison
-  grid.arrange(Vis_3.1, Vis_3.1_84, ncol=2) #No visible distortion, but polygons are
-                                        #not the nearest. See below:
-  
-  
-  ##Troubleshooting..
-  print(ANPs_84$ESTADOS) #We search for "Ciudad de México"
-  
-  #Checking out the differences after command manipulation.
-  
-  Vis_843=ggplot()+geom_sf(data=DCdmx_84, fill="white")+
-    geom_sf(data=subset(ANPs_84, ANPs_84$ESTADOS== "Ciudad de México"), fill="green")+
-    coord_sf()
-  Vis_843
-  
-  #We create a subset for actual nearest ANPs to cdmx.
- ANPs_cdmx=subset(ANPs_84, ANPs_84$ESTADOS=="Ciudad de México") 
-  
-  Vis_844= ggplot() +
-    geom_sf(data=st_cast(DCdmx_84, fill="white"))+
-    geom_sf(data=st_cast(ANPs_cdmx, to="POLYGON"), fill="green")+
-    coord_sf()
-  Vis_844
-  
-  grid.arrange(Vis_843, Vis_844, ncol=2) # Does st_cast() remove
-                                         # "Ciudad de M?xico" polygon?
-                                         # No.
-  
-  #Further evidence
-  #Just execute all and compare them in the grid.
-  
-  ANPs_cdmx=subset(ANPs, ANPs$ESTADOS=="Ciudad de México") 
-  ANPs_cdmx_84=subset(ANPs_84, ANPs_84$ESTADOS=="Ciudad de México")
-  
-  Vis_df=ggplot()+geom_sf(data=ANPs_cdmx, fill="white")+
-    coord_sf()
-  
-  Vis_df_84=ggplot()+
-    geom_sf(data=ANPs_cdmx_84, fill="white")+
-    coord_sf()
-  
-  Vis_cast_df=ggplot()+
-    geom_sf(data=st_cast(ANPs_cdmx, to="POLYGON"), fill="white")+
-    coord_sf()
-  
-  Vis_cast_df_84=ggplot()+
-    geom_sf(data=st_cast(ANPs_cdmx_84, to="POLYGON"), fill="white")+
-    coord_sf()
-  
-  grid.arrange(Vis_df, Vis_df_84, Vis_cast_df, Vis_cast_df_84, ncol=2, nrow=2)
-  
-  #st_nearest_feature() malfunction?
-  
-
 # 2.2 Using rgeos ---------------------------------------------------------
   library(rgeos)
   
